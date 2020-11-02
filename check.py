@@ -3,7 +3,7 @@ import hashlib
 import requests
 import getpass
 import json
-import sys
+#import sys
 
 def collection_metrics(server_path: str, login:str, password: str):
 	url='http://'+server_path+'/metrics'

@@ -6,7 +6,8 @@ app = FastAPI()
 import uvicorn
 
 import check_auth_data		#подключили наш проверяющий файлик
-import datetime
+import time
+#import datetime
 
 #необходимо, чтобы работать с json'ом
 import json
@@ -34,12 +35,57 @@ programMetrics=[0,0,0]
 #1 - количество отображения текущей погоды в указанном городе ("/v1/current/")
 #2 - обращений к сайту OpenWeatherMap
 
+processing_time_of_the_request_root_page = [] 			#время обработки запроса корневой страницы
+processing_time_of_the_request_current_weather = []		#время обработки запроса текущей погоды
+processing_time_of_the_request_forecast_weather = []	#время обработки запроса прогноза погоды
+
+def calculate_average_value():
+	global processing_time_of_the_request_root_page
+	global processing_time_of_the_request_current_weather
+	global processing_time_of_the_request_forecast_weather
+	average1 = float(0)
+	average2 = float(0)
+	average3 = float(0)
+
+	try:
+		n = 0
+		for i in processing_time_of_the_request_root_page:
+			average1 += processing_time_of_the_request_root_page.pop()
+			n+=1
+		average1 /= n
+	except ZeroDivisionError:
+		average1 = float(0)
+
+	try:
+		n = 0
+		for i in processing_time_of_the_request_current_weather:
+			average2 += processing_time_of_the_request_current_weather.pop()
+			n+=1
+		average2 /= n
+	except ZeroDivisionError:
+		average2 = float(0)
+	
+	try:
+		n = 0	
+		for i in processing_time_of_the_request_forecast_weather:
+			average3 += processing_time_of_the_request_forecast_weather.pop()
+			n+=1
+		average3 /= n
+	except ZeroDivisionError:
+		average3 = float(0)
+	
+	return json.dumps({"root_page":average1,"current":average2,"forecast":average3})
+
+
+
+
 @app.get("/")
 def print_web():
+	time_to_start = time.time()
 	global programMetrics
+	global processing_time_of_the_request_root_page
 	programMetrics[0]+=1
-	html_content = """
-		<html>
+	html_content = """<html>
 	<head>
 	<title>Погодный сервис</title>
 	<style>
@@ -85,8 +131,9 @@ def print_web():
 		</tr>
 		</table>
 	</body>
-	</html>
-	"""
+</html>
+"""
+	processing_time_of_the_request_root_page.append(time.time() - time_to_start)
 	return HTMLResponse(content=html_content, status_code=200)
 
 @app.get("/metrics")
@@ -98,15 +145,17 @@ def metrics(user_login: str, hash_sum: str):
 		count_dispays_current_weather_in_city 	= programMetrics[1]#1 - количество отображения текущей погоды в указанном городе ("/v1/current/")
 		count_requests_to_OpenWeatherMap		= programMetrics[2]#2 - обращений к сайту OpenWeatherMap
 		programMetrics=[0,0,0]
-		return json.dumps({"status":"ok", "pid": os.getpid(), "id_service": my_id, "count_visit_site_root": count_visit_site_root, "count_dispays_current_weather_in_city": count_dispays_current_weather_in_city, "count_requests_to_OpenWeatherMap": count_requests_to_OpenWeatherMap })
+		return json.dumps({"status_auth":"ok", "id_service": my_id, "count_visit_root": count_visit_site_root, "count_dispays_current_weather": count_dispays_current_weather_in_city, "count_requests_to_OWM": count_requests_to_OpenWeatherMap, "avr": json.loads(calculate_average_value()) })
 	else:
-		return json.dumps({"status":"invalid login or password", "id_service": my_id})
+		return json.dumps({"status_auth":"invalid login or password", "id_service": my_id})
 
 @app.get("/v1/current/")
 #city=<name city>
 #http://127.0.0.1:8000/v1/current/?city=Moscow
 def current(city: str):
+	time_to_start = time.time()
 	global programMetrics
+	global processing_time_of_the_request_current_weather
 	programMetrics[1]+=1
 	programMetrics[2]+=1
 	mgr = owm.weather_manager()
@@ -116,6 +165,7 @@ def current(city: str):
 	temp = w.temperature('celsius')['temp']
 	#вывод в консоль
 	print(" request: " + city + "\t" + w.detailed_status + "\t" + str( temp ))
+	processing_time_of_the_request_current_weather.append(time.time() - time_to_start)
 	return json.dumps({"city": city,"unit": "celsius", "temperature": temp, "id_service": my_id})
 
 
@@ -123,25 +173,28 @@ def current(city: str):
 #city=<name city>&timestamp=<timestamp>
 #http://127.0.0.1:8000/v1/forecast/?city=Moscow&timestamp=3h
 def forecast(city: str, timestamp: str):
+	time_to_start = time.time()
 	global programMetrics
+	global processing_time_of_the_request_forecast_weather
 	programMetrics[2]+=1
 	mgr = owm.weather_manager()
 
 	observation = mgr.forecast_at_place(city, "3h") #данной командой стягивается прогноз погоды на ближайшие 5 дней с частотой 3 часа
 	if timestamp == "1h":
-		time = timestamps.next_hour()
+		timest = timestamps.next_hour()
 	elif timestamp == "3h":
-		time = timestamps.next_three_hours() 
+		timest = timestamps.next_three_hours() 
 	elif timestamp == "tomorrow":
-		time = timestamps.tomorrow()
+		timest = timestamps.tomorrow()
 	elif timestamp == "yesterday":
-		time = timestamps.yesterday()
+		timest = timestamps.yesterday()
 	else:
-		time = timestamps.now();
-	w = observation.get_weather_at(time)
+		timest = timestamps.now();
+	w = observation.get_weather_at(timest)
 	temp = w.temperature('celsius')['temp']
 	#вывод в консоль
-	print(" request: " + city + "\ttime: "+ str(time) + "\t" + w.detailed_status + "\t" + str( temp ))
+	print(" request: " + city + "\ttime: "+ str(timest) + "\t" + w.detailed_status + "\t" + str( temp ))
+	processing_time_of_the_request_forecast_weather.append(time.time() - time_to_start)
 	return json.dumps({"city": city,"unit": "celsius", "temperature": temp, "id_service": my_id})
 
 if __name__ == "__main__":
