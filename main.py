@@ -5,6 +5,9 @@ app = FastAPI()
 
 import uvicorn
 
+import check_auth_data		#подключили наш проверяющий файлик
+import datetime
+
 #необходимо, чтобы работать с json'ом
 import json
 
@@ -78,6 +81,14 @@ def print_web():
 	</html>
 	"""
 	return HTMLResponse(content=html_content, status_code=200)
+
+@app.get("/metrics")
+def metrics(user_login: str, hash_sum: str):
+	result_json = json.loads(check_auth_data.check_value_hash(user_login, hash_sum))
+	if (result_json["result"]=='true'):
+		return json.dumps({"status":"valid", "pid": os.getpid(), "id_service": my_id})
+	else:
+		return json.dumps({"status":"invalid login or password", "id_service": my_id})
 
 @app.get("/v1/current/")
 #city=<name city>
