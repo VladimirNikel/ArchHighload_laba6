@@ -18,8 +18,8 @@
         * `docker build -t ubuntu/archhightload_laba6_1 -f dockerfile1 .`
         * `docker build -t ubuntu/archhightload_laba6_2 -f dockerfile2 .`
     1. Выполнить команду `docker run -it --name <название контейнера> -p 0.0.0.0:<порт>:8000 ubuntu/archhightload_laba2` для создания docker-контейнера из docker-образа. В рамках задания были выполнены команды:
-        * `docker run -it --name laba6_1_archHL -p 0.0.0.0:5020:8000 ubuntu/archhightload_laba6_1`
-        * `docker run -it --name laba6_2_archHL -p 0.0.0.0:5030:8000 ubuntu/archhightload_laba6_2`
+        * `docker run -td --name laba6_1_archHL --restart on-failure -p 0.0.0.0:5020:8000 ubuntu/archhightload_laba6_1`
+        * `docker run -td --name laba6_2_archHL --restart on-failure -p 0.0.0.0:5030:8000 ubuntu/archhightload_laba6_2`
 1. На третьем сервере необходимо установить Nginx (инструкция приложена) и прописать в конфигурационном файле `/etc/nginx/nginx.config` как в приложенном к репозиторию одноименном файле.
 1. Потом выполнить команду перезапуска Nginx'а: `nginx -s reload`
 1. Далее воспользуйтесь либо браузером по [адресу](http://127.0.0.1:80) `http://127.0.0.1:80/` либо воспользуйтесь терминалом:
