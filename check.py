@@ -3,9 +3,14 @@ import hashlib
 import requests
 import getpass
 import json
+import sys
 
-login		= str(input("Введите логин: "))
-password	= str(getpass.getpass("Введите пароль: "))
+if len(sys.argv) == 3:
+	login		= str(sys.argv[1])
+	password	= str(sys.argv[2])
+else:
+	login		= str(input("Введите логин: "))
+	password	= str(getpass.getpass("Введите пароль: "))
 
 current_date_utc= datetime.datetime.utcnow().strftime("%Y.%m.%d_%H:%M:%S")
 input_value		= login+current_date_utc+password
