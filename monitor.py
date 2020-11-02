@@ -18,13 +18,17 @@ def main_job():
 	for i in range(len(pull_serv)):
 		print(json.loads(collection_metrics(pull_serv[i], login, password)))
 
-try:
-	while 1:
-		print("Данные на", datetime.datetime.now().strftime("%H:%M:%S %d.%m.%Y"))
-		t = threading.Timer(time_to_wait, main_job)
-		t.start()
-		t.join()
+def interview_serv():		#основная функция опроса серверов
+	try:
+		while 1:
+			#print("Данные на", datetime.datetime.now().strftime("%H:%M:%S %d.%m.%Y"))
+			t = threading.Timer(time_to_wait, main_job)
+			t.start()
+			t.join()
 
-except KeyboardInterrupt:
-	print("\n\nЧто ж, до встречи...\nОсталось долждаться ответа от количества потоков: ",threading.active_count()-1)
-	exit(0)
+	except KeyboardInterrupt:
+		print("\n\nЧто ж, до встречи...\nОсталось дождаться ответа от количества потоков: ",threading.active_count()-1)
+		return 0
+
+
+interview_serv()

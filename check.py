@@ -15,8 +15,12 @@ def collection_metrics(server_path: str, login:str, password: str):
 	    ('user_login', login),
 	    ('hash_sum', calculate_hash)
 	)
-	response = requests.get(url, params=params)
-	return json.dumps({"server_path": server_path, "date_utc": current_date_utc, "data": json.loads(response.content.decode())})
+	try:
+		response = requests.get(url, params=params)
+	except OSError:
+		return json.dumps({"server_path": server_path, "date_utc": datetime.datetime.utcnow().strftime("%Y.%m.%d %H:%M:%S"), "status":"unavailable"})
+	else:
+		return json.dumps({"server_path": server_path, "date_utc": datetime.datetime.utcnow().strftime("%Y.%m.%d %H:%M:%S"), "status":"available", "data": json.loads(response.content.decode())})
 
 #if len(sys.argv) == 3:
 #	login		= str(sys.argv[1])
