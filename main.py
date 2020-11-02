@@ -29,8 +29,15 @@ owm = pyowm.OWM(app_key, config_dict)
 
 my_id = sys.argv[1]
 
+programMetrics=[0,0,0]
+#0 - количество посещений корневого сайта ("/")
+#1 - количество отображения текущей погоды в указанном городе ("/v1/current/")
+#2 - обращений к сайту OpenWeatherMap
+
 @app.get("/")
 def print_web():
+	global programMetrics
+	programMetrics[0]+=1
 	html_content = """
 		<html>
 	<head>
@@ -84,9 +91,14 @@ def print_web():
 
 @app.get("/metrics")
 def metrics(user_login: str, hash_sum: str):
+	global programMetrics
 	result_json = json.loads(check_auth_data.check_value_hash(user_login, hash_sum))
 	if (result_json["result"]=='true'):
-		return json.dumps({"status":"valid", "pid": os.getpid(), "id_service": my_id})
+		count_visit_site_root 					= programMetrics[0]#0 - количество посещений корневого сайта ("/")
+		count_dispays_current_weather_in_city 	= programMetrics[1]#1 - количество отображения текущей погоды в указанном городе ("/v1/current/")
+		count_requests_to_OpenWeatherMap		= programMetrics[2]#2 - обращений к сайту OpenWeatherMap
+		programMetrics=[0,0,0]
+		return json.dumps({"status":"ok", "pid": os.getpid(), "id_service": my_id, "count_visit_site_root": count_visit_site_root, "count_dispays_current_weather_in_city": count_dispays_current_weather_in_city, "count_requests_to_OpenWeatherMap": count_requests_to_OpenWeatherMap })
 	else:
 		return json.dumps({"status":"invalid login or password", "id_service": my_id})
 
@@ -94,6 +106,9 @@ def metrics(user_login: str, hash_sum: str):
 #city=<name city>
 #http://127.0.0.1:8000/v1/current/?city=Moscow
 def current(city: str):
+	global programMetrics
+	programMetrics[1]+=1
+	programMetrics[2]+=1
 	mgr = owm.weather_manager()
 
 	observation = mgr.weather_at_place(city)
@@ -108,6 +123,8 @@ def current(city: str):
 #city=<name city>&timestamp=<timestamp>
 #http://127.0.0.1:8000/v1/forecast/?city=Moscow&timestamp=3h
 def forecast(city: str, timestamp: str):
+	global programMetrics
+	programMetrics[2]+=1
 	mgr = owm.weather_manager()
 
 	observation = mgr.forecast_at_place(city, "3h") #данной командой стягивается прогноз погоды на ближайшие 5 дней с частотой 3 часа
