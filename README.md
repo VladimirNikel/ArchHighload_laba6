@@ -37,6 +37,31 @@
 
 ## Обновления:
 
+В результате работы кода получится примерно следующее:
+```bash
+nikel@Aspire-A717-71G:~/dev/University/ArchHighload/6 laba$ python3 monitor.py 
+Введите логин: Nikel
+Введите пароль: 
+Введите количество секунд, через которое будут опрашиваться сервера: 45
+Начал работать в 02:57:36 03.11.2020
+{'server_path': '127.0.0.1:8000', 'date_utc': '2020.11.02 23:58:21', 'status': 'unavailable'}
+{'server_path': '194.61.2.84:5020', 'date_utc': '2020.11.02 23:58:21', 'status': 'available', 'data': '{"status_auth": "ok", "id_service": "1", "count_visit_root": 2, "count_dispays_current_weather": 1, "count_requests_to_OWM": 5, "avr": {"root_page": 1.7881393432617188e-06, "current": 0.23424744606018066, "forecast": 0.23913037776947021}}'}
+{'server_path': '194.61.2.84:5030', 'date_utc': '2020.11.02 23:58:21', 'status': 'available', 'data': '{"status_auth": "ok", "id_service": "2", "count_visit_root": 4, "count_dispays_current_weather": 2, "count_requests_to_OWM": 2, "avr": {"root_page": 2.2649765014648438e-06, "current": 0.24375951290130615, "forecast": 0.24423933029174805}}'}
+{'server_path': '127.0.0.1:8000', 'date_utc': '2020.11.02 23:59:06', 'status': 'available', 'data': '{"status_auth": "ok", "id_service": "0", "count_visit_root": 1, "count_dispays_current_weather": 1, "count_requests_to_OWM": 3, "avr": {"root_page": 1.9073486328125e-06, "current": 0.8310353755950928, "forecast": 0.5098166465759277}}'}
+{'server_path': '194.61.2.84:5020', 'date_utc': '2020.11.02 23:59:06', 'status': 'available', 'data': '{"status_auth": "ok", "id_service": "1", "count_visit_root": 2, "count_dispays_current_weather": 0, "count_requests_to_OWM": 2, "avr": {"root_page": 2.2649765014648438e-06, "current": 0.0, "forecast": 0.2474595308303833}}'}
+{'server_path': '194.61.2.84:5030', 'date_utc': '2020.11.02 23:59:06', 'status': 'available', 'data': '{"status_auth": "ok", "id_service": "2", "count_visit_root": 1, "count_dispays_current_weather": 1, "count_requests_to_OWM": 3, "avr": {"root_page": 2.2649765014648438e-06, "current": 0.19890618324279785, "forecast": 0.28251147270202637}}'}
+^C
+
+Что ж, до встречи...
+Осталось дождаться ответа от количества потоков:  1
+{'server_path': '127.0.0.1:8000', 'date_utc': '2020.11.02 23:59:51', 'status': 'available', 'data': '{"status_auth": "ok", "id_service": "0", "count_visit_root": 0, "count_dispays_current_weather": 0, "count_requests_to_OWM": 0, "avr": {"root_page": 0.0, "current": 0.0, "forecast": 0.534808874130249}}'}
+{'server_path': '194.61.2.84:5020', 'date_utc': '2020.11.02 23:59:51', 'status': 'available', 'data': '{"status_auth": "ok", "id_service": "1", "count_visit_root": 0, "count_dispays_current_weather": 0, "count_requests_to_OWM": 0, "avr": {"root_page": 2.1457672119140625e-06, "current": 0.0, "forecast": 0.33891844749450684}}'}
+{'server_path': '194.61.2.84:5030', 'date_utc': '2020.11.02 23:59:51', 'status': 'available', 'data': '{"status_auth": "ok", "id_service": "2", "count_visit_root": 0, "count_dispays_current_weather": 0, "count_requests_to_OWM": 0, "avr": {"root_page": 2.1457672119140625e-06, "current": 0.26261353492736816, "forecast": 0.3184547424316406}}'}
+```
+
+Как видно из представленного ответа монитора, в коде прописана обработка доступности сервера (если сервер приуныл, мы в статусе видим это `{'server_path': '127.0.0.1:8000', 'date_utc': '2020.11.02 23:58:21', 'status': 'unavailable'}`).
+
+Также, можно заметить что локальный сервер "подтормаживает" на фоне удаленных серверов, расположенных где-то там, где скорость интернета куда выше, чем раздающийся с мобильного телефона трафик...
 
 
 ## Инструментарий:
